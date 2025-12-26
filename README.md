@@ -1,10 +1,11 @@
-# Project: PostgreSQL 18 + Atlas (DB migrations) + pgAdmin via Docker Compose
+# Multi Tenant Double Entry Accounting DB schema
 
 ## Overview
 This project provides a ready-to-run local development stack with:
 - PostgreSQL 18 as the database
 - Atlas as the database migration tool
 - pgAdmin 4 as the database management UI
+- PgTap the unit test framework
 - Docker Compose to orchestrate all services and run migrations automatically on startup
 
 ## Repository structure
@@ -26,10 +27,10 @@ This project provides a ready-to-run local development stack with:
 - Edit .env to adjust credentials and ports if needed.
 
 2) Start the stack
-- Run: docker compose up --build
+- Run: `docker compose up`
 - What will happen:
     - Postgres 18 starts and becomes healthy.
-    - The migrate service runs "atlas migrate apply --env docker" one time and exits after applying migrations.
+    - The migrate service runs "atlas migrate apply" one time and exits after applying migrations.
     - pgAdmin becomes available on http://localhost:5050 (default).
 
 3) Access pgAdmin
@@ -42,10 +43,10 @@ This project provides a ready-to-run local development stack with:
         - Name: Local Postgres (any name you like)
     - Connection
         - Host name/address: db
-        - Port: 5432 (or your POSTGRES_PORT if changed)
-        - Maintenance database: ledger (or your POSTGRES_DB)
-        - Username: postgres (or your POSTGRES_USER)
-        - Password: postgres (or your POSTGRES_PASSWORD)
+        - Port: 5432 (or your PGPORT if changed)
+        - Maintenance database: ledger (or your PGDATABASE)
+        - Username: postgres (or your PGUSER)
+        - Password: postgres (or your PGPASSWORD)
 - Save and connect. You should see the ledger database and (after the first run) the core tables under Schemas -> public -> Tables.
 
 ## Managing migrations with Atlas
@@ -59,20 +60,20 @@ This project provides a ready-to-run local development stack with:
 
 ## Apply migrations (re-run manually)
 - The migrate service runs automatically on docker compose up. If you add new migration files or see checksum errors, run:
-    - docker compose run --rm migrate migrate hash --env docker
-    - docker compose run --rm migrate migrate apply --env docker
+    - `docker compose run --rm migrate migrate hash`
+    - `docker compose run --rm migrate migrate apply`
 
 ## See migration status
-- docker compose run --rm migrate atlas migrate status --env docker
+- `docker compose run --rm migrate migrate status`
 
 ## Roll back last migration (down)
-- docker compose run --rm migrate atlas migrate down --env docker -- 1
+- `docker compose run --rm migrate migrate down -- 1`
     - The trailing "-- 1" tells Atlas to revert one migration. Adjust as needed.
 
 ## Running Tests with pgTAP
 - Tests are located in: PGTap/
 - To run all tests:
-    - docker compose run --rm pgtap
+    - `docker compose run --rm pgtap`
 - This will:
     1. Ensure the database and migrations are ready.
     2. Install the pgtap extension (if not already present).
@@ -80,13 +81,13 @@ This project provides a ready-to-run local development stack with:
 
 ## Stop the stack
 - Press Ctrl+C in the terminal where docker compose up is running, then:
-    - docker compose down
+    - `docker compose down`
 
 ## Persisted data and volumes
 - Postgres data is persisted in the db_data Docker volume.
 - pgAdmin state is persisted in the pgadmin_data Docker volume.
 - To remove containers and volumes (CAUTION: destroys your DB data):
-    - docker compose down -v
+    - `docker compose down -v`
 
 ## Configuration reference
 - .env variables (defaults shown):
@@ -107,19 +108,22 @@ This project provides a ready-to-run local development stack with:
 
 ## Troubleshooting
 - Port already in use:
-    - Change POSTGRES_PORT or PGADMIN_PORT in .env and re-run docker compose up.
+    - Change PGPORT or PGADMIN_PORT in .env and re-run docker compose up.
 - Authentication failure in pgAdmin:
     - Ensure your pgAdmin connection user/password matches the values in .env for Postgres.
+- Update the atlas.sum file:
+    - Run `docker compose run --rm migrate migrate hash` to generate checksums and apply:
 - Migrations didn’t run:
     - Check logs of the migrate service: docker compose logs migrate
-    - Run manually: docker compose run --rm migrate
+    - Run manually: `docker compose run --rm migrate`
 - Checksum error about atlas.sum:
-    - If you see "You have a checksum error in your migration directory" or "checksum file not found", just run the migrate service to generate checksums and apply: docker compose run --rm migrate
+    - If you see "You have a checksum error in your migration directory" or "checksum file not found", just run the migrate service to generate checksums and apply: `docker compose run --rm migrate`
 - Reset everything (DANGER: deletes data):
-    - docker compose down -v && docker compose up --build
+    - `docker compose down -v && docker compose up`
 
 ## TODO
 - [x] Create a function to create a tenant
+- [ ] Create a function to create an account for a tenant
 - [ ] Create a function to create a ledger
 - [ ] Create a function to create a ledger entry
 - [ ] Create a function to query ledger entries
