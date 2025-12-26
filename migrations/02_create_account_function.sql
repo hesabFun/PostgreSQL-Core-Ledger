@@ -1,6 +1,5 @@
 -- Function to create a new account for a tenant
 CREATE OR REPLACE FUNCTION create_account(
-    p_tenant_id UUID,
     p_account_number VARCHAR(50),
     p_name VARCHAR(255),
     p_account_type_id INT,
@@ -15,7 +14,6 @@ DECLARE
 BEGIN
     -- Insert the account
     INSERT INTO accounts (
-        tenant_id,
         account_number,
         name,
         description,
@@ -24,7 +22,6 @@ BEGIN
         parent_account_id
     )
     VALUES (
-        p_tenant_id,
         p_account_number,
         p_name,
         p_description,

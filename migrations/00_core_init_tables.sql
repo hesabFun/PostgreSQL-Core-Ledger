@@ -160,3 +160,8 @@ ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 -- Create access policy (Tenant only sees its own data)
 CREATE POLICY tenant_isolation_policy ON accounts
     USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
+
+-- Set default tenant_id on new accounts
+ALTER TABLE accounts
+    ALTER COLUMN tenant_id
+        SET DEFAULT current_setting('app.current_tenant_id')::uuid;
