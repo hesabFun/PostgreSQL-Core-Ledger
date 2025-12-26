@@ -123,7 +123,7 @@ This project provides a ready-to-run local development stack with:
 
 ## TODO
 - [x] Create a function to create a tenant
-- [ ] Create a function to create an account for a tenant
+- [x] Create a function to create an account for a tenant
 - [ ] Create a function to create a ledger
 - [ ] Create a function to create a ledger entry
 - [ ] Create a function to query ledger entries
