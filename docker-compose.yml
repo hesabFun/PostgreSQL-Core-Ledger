@@ -2,16 +2,12 @@ services:
   db:
     image: pshaddel/postgres-pgtap:18
     container_name: pgsql_db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-ledger}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -27,10 +23,6 @@ services:
       - ./migrations:/workspace/migrations
       - ./atlas.hcl:/workspace/atlas.hcl
     environment:
-      PGHOST: db
-      PGUSER: ${POSTGRES_USER:-postgres}
-      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      PGDATABASE: ${POSTGRES_DB:-ledger}
       ATLAS_LOG_FORMAT: ${ATLAS_LOG_FORMAT:-cli}
     command: ["migrate", "apply", "--env", "docker"]
     restart: "no"
@@ -63,7 +55,6 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PGDATABASE: ${POSTGRES_DB:-ledger}
     volumes:
-      - db_data:/var/lib/postgresql
       - ./PGTap:/tests
     entrypoint: >
       sh -c "psql -c 'CREATE EXTENSION IF NOT EXISTS pgtap;' && pg_prove /tests/*.sql"
