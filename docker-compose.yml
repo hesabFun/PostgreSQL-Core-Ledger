@@ -46,6 +46,8 @@ services:
   pgtap:
     image: pshaddel/postgres-pgtap:18
     container_name: pgtap
+    profiles:
+      - manual
     depends_on:
       migrate:
         condition: service_completed_successfully
