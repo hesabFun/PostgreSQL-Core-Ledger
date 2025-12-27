@@ -1,10 +1,12 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
-SELECT plan(37);
+SELECT plan(40);
 
 -- Check extensions
+SELECT has_extension('pgtap');
 SELECT has_extension('pgcrypto');
 SELECT has_extension('pg_trgm');
+
 
 -- Check tables
 SELECT has_table('tenants');
@@ -44,10 +46,10 @@ SELECT has_trigger('journal_entries', 'trg_upd_journal_entries');
 SELECT has_trigger('account_balances', 'trg_upd_account_balances');
 
 -- Check RLS on accounts
--- SELECT table_has_rls('accounts');
+SELECT ok(rowsecurity, 'Table accounts should have RLS enabled') FROM pg_tables WHERE schemaname = 'public' AND tablename = 'accounts';
 
 -- Check policies
--- SELECT has_policy('accounts', 'tenant_isolation_policy');
+SELECT policy_cmd_is('accounts', 'tenant_isolation_policy', 'ALL');
 
 -- Check functions
 SELECT has_function('update_timestamp_column');
