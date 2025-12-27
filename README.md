@@ -60,8 +60,8 @@ This project provides a ready-to-run local development stack with:
 
 ## Apply migrations (re-run manually)
 - The migrate service runs automatically on docker compose up. If you add new migration files or see checksum errors, run:
-    - `docker compose run --rm migrate migrate hash`
-    - `docker compose run --rm migrate migrate apply`
+    - `docker compose run --rm hash`
+    - `docker compose run --rm migrate`
 
 ## See migration status
 - `docker compose run --rm migrate migrate status`

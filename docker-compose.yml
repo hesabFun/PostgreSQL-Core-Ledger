@@ -25,7 +25,7 @@ services:
     working_dir: /workspace
     volumes:
       - ./migrations:/workspace/migrations
-      - ./atlas.hcl:/workspace/atlas.hcl
+      - ./atlas.hcl:/workspace/atlas.hcl:ro
     environment:
       ATLAS_LOG_FORMAT: ${ATLAS_LOG_FORMAT:-cli}
     command: ["migrate", "apply", "--env", "docker"]
@@ -47,12 +47,31 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  hash:
+    image: arigaio/atlas:latest
+    container_name: atlas_hash
+    profiles:
+      - manual
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /workspace
+    volumes:
+      - ./migrations:/workspace/migrations
+      - ./atlas.hcl:/workspace/atlas.hcl
+    environment:
+      ATLAS_LOG_FORMAT: ${ATLAS_LOG_FORMAT:-cli}
+    command: ["migrate", "hash"]
+    restart: "no"
+
   pgtap:
     image: pshaddel/postgres-pgtap:18
     container_name: pgtap
     profiles:
       - manual
     depends_on:
+      hash:
+        condition: service_completed_successfully
       migrate:
         condition: service_completed_successfully
     environment:
