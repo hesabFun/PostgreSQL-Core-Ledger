@@ -3,16 +3,17 @@ SELECT plan(6);
 
 -- Setup: Create a tenant, account type, and currency
 INSERT INTO tenants (name) VALUES ('Test Tenant');
+SELECT set_config('app.current_tenant_id', (SELECT id FROM tenants WHERE name = 'Test Tenant' LIMIT 1)::text, true);
+
 INSERT INTO account_types (code, name, normal_balance) VALUES ('ASSET', 'Asset', 'DEBIT');
 INSERT INTO currencies (code, name, symbol) VALUES ('USD', 'US Dollar', '$');
 
 -- Check if function exists
-SELECT has_function('create_account', ARRAY['uuid', 'character varying', 'character varying', 'integer', 'character varying', 'text', 'uuid']);
+SELECT has_function('create_account', ARRAY['character varying', 'character varying', 'integer', 'character varying', 'text', 'uuid']);
 
 -- Test creating an account
 SELECT lives_ok(
     $$ SELECT create_account(
-        (SELECT id FROM tenants WHERE name = 'Test Tenant' LIMIT 1),
         '1001',
         'Cash',
         (SELECT id FROM account_types WHERE code = 'ASSET' LIMIT 1),

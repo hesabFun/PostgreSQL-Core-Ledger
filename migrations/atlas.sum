@@ -1,4 +1,5 @@
-h1:NJTRYl5KhdqY8/h5Y7DRQSk1cThhFj5VLmSek9lFuDw=
+h1:tKpmHRHC52nMlCp0hX7Xa9NNtjvkGgdW41Mftdiddow=
 00_core_init_tables.sql h1:0xeN3jqd/kOsrFAKSnHBeob0JPAIPSHW7PNx9Lktzfw=
 01_create_tenant_function.sql h1:BprTLwGT0B2EQ/aUgm+RDIGAky9wSw2p5UKAkfNd+EI=
 02_create_account_function.sql h1:4OqZVzWyabd2MfY8DovgZryNvDc98AZj6O8aHdbsgVo=
+03_create_journal_entry_function.sql h1:ncS6epGzsbk9vooFQnTd6NVCauAcgkafky89VkNduMA=
