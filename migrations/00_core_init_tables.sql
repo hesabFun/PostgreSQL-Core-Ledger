@@ -36,24 +36,6 @@ CREATE TABLE IF NOT EXISTS currencies
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Exchange Rates table
-CREATE TABLE IF NOT EXISTS exchange_rates
-(
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id     UUID           NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
-    from_currency VARCHAR(10)    NOT NULL,
-    to_currency   VARCHAR(10)    NOT NULL,
-    rate          NUMERIC(20, 8) NOT NULL CHECK (rate > 0),
-    source        VARCHAR(100)   NOT NULL,
-    valid_from    TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP,
-    valid_to      TIMESTAMPTZ,
-    created_at    TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (from_currency) REFERENCES currencies (code),
-    FOREIGN KEY (to_currency) REFERENCES currencies (code),
-    CHECK (from_currency != to_currency)
-);
-
 -- Chart of Accounts
 CREATE TABLE IF NOT EXISTS accounts
 (
@@ -111,21 +93,6 @@ CREATE TABLE IF NOT EXISTS account_balances
     updated_at     TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP
 );
 
--- Currency Conversion Log
-CREATE TABLE IF NOT EXISTS currency_conversion_log
-(
-    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id         UUID           NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
-    source_account_id UUID           NOT NULL REFERENCES accounts (id),
-    target_account_id UUID           NOT NULL REFERENCES accounts (id),
-    source_amount     NUMERIC(20, 4) NOT NULL,
-    exchange_rate     NUMERIC(20, 8) NOT NULL,
-    target_amount     NUMERIC(20, 4) NOT NULL,
-    journal_entry_id  UUID           NOT NULL REFERENCES journal_entries (id),
-    created_at        TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Create function to update timestamp columns
 CREATE OR REPLACE FUNCTION update_timestamp_column()
     RETURNS TRIGGER AS
@@ -140,7 +107,6 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_upd_tenants BEFORE UPDATE ON tenants FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 CREATE TRIGGER trg_upd_account_types BEFORE UPDATE ON account_types FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 CREATE TRIGGER trg_upd_currencies BEFORE UPDATE ON currencies FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
-CREATE TRIGGER trg_upd_exchange_rates BEFORE UPDATE ON exchange_rates FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 CREATE TRIGGER trg_upd_accounts BEFORE UPDATE ON accounts FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 CREATE TRIGGER trg_upd_journal_entries BEFORE UPDATE ON journal_entries FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 CREATE TRIGGER trg_upd_account_balances BEFORE UPDATE ON account_balances FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
@@ -151,8 +117,6 @@ COMMENT ON TABLE accounts IS 'Chart of accounts for each tenant, each account su
 COMMENT ON TABLE journal_entries IS 'Double-entry journal transactions';
 COMMENT ON TABLE journal_entry_lines IS 'Individual debit/credit entries within a journal transaction';
 COMMENT ON TABLE account_balances IS 'Denormalized account balances for performance';
-COMMENT ON TABLE exchange_rates IS 'Currency exchange rates with validity periods';
-COMMENT ON TABLE currency_conversion_log IS 'Log of all currency conversions';
 
 -- Enabling RLS
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
