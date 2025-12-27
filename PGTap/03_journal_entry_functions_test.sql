@@ -19,12 +19,11 @@ INSERT INTO account_balances (account_id) VALUES ('00000000-0000-0000-0000-00000
 INSERT INTO account_balances (account_id) VALUES ('00000000-0000-0000-0000-000000000102');
 
 -- Test 1: Check if function exists
-SELECT has_function('create_journal_entry', ARRAY['uuid', 'character varying', 'text', 'timestamp with time zone', 'jsonb', 'jsonb']);
+SELECT has_function('create_journal_entry', ARRAY['character varying', 'text', 'timestamp with time zone', 'jsonb', 'jsonb']);
 
 -- Test 2: Successful creation of a balanced entry
 SELECT lives_ok(
     $$ SELECT create_journal_entry(
-        '00000000-0000-0000-0000-000000000001',
         'REF-001',
         'Initial Sale',
         CURRENT_TIMESTAMP,
@@ -69,7 +68,6 @@ SELECT is(
 -- Test 7: Unbalanced entry should fail (will do this in a separate block or use throws_ok if available)
 SELECT throws_ok(
     $$ SELECT create_journal_entry(
-        '00000000-0000-0000-0000-000000000001',
         'REF-FAIL',
         'Unbalanced',
         CURRENT_TIMESTAMP,
@@ -110,7 +108,6 @@ SELECT set_config('app.current_tenant_id', '00000000-0000-0000-0000-000000000001
 -- Test 8: RLS - Should fail when using account from another tenant
 SELECT throws_ok(
     $$ SELECT create_journal_entry(
-        '00000000-0000-0000-0000-000000000001',
         'RLS-FAIL-1',
         'Invisible account',
         CURRENT_TIMESTAMP,
@@ -127,7 +124,6 @@ SELECT throws_ok(
 -- (This fails because journal_entries RLS prevents inserting for another tenant)
 SELECT throws_ok(
     $$ SELECT create_journal_entry(
-        '00000000-0000-0000-0000-000000000002',
         'RLS-FAIL-2',
         'Wrong tenant',
         CURRENT_TIMESTAMP,
@@ -136,7 +132,7 @@ SELECT throws_ok(
             {"account_id": "00000000-0000-0000-0000-000000000201", "debit": 0.00, "credit": 100.00}
         ]'::jsonb
     ) $$,
-    NULL,
+    'One or more accounts are invalid, do not belong to the specified tenant, or are not accessible',
     'Should fail when creating entry for another tenant'
 );
 

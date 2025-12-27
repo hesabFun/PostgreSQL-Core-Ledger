@@ -1,6 +1,5 @@
 -- Function to create a balanced journal entry with multiple lines
 CREATE OR REPLACE FUNCTION create_journal_entry(
-    p_tenant_id UUID,
     p_reference_number VARCHAR(100),
     p_description TEXT,
     p_entry_date TIMESTAMPTZ,
@@ -10,6 +9,7 @@ CREATE OR REPLACE FUNCTION create_journal_entry(
     RETURNS UUID AS
 $$
 DECLARE
+    v_tenant_id        UUID := current_setting('app.current_tenant_id')::uuid;
     v_journal_entry_id UUID;
     v_total_debit      NUMERIC(20, 4) := 0;
     v_total_credit     NUMERIC(20, 4) := 0;
@@ -40,13 +40,13 @@ BEGIN
        (SELECT count(*)
         FROM accounts
         WHERE id IN (SELECT (l ->> 'account_id')::UUID FROM jsonb_array_elements(p_lines) AS l)
-          AND tenant_id = p_tenant_id) THEN
+          AND tenant_id = v_tenant_id) THEN
         RAISE EXCEPTION 'One or more accounts are invalid, do not belong to the specified tenant, or are not accessible';
     END IF;
 
     -- 3. Insert Journal Entry Header
     INSERT INTO journal_entries (tenant_id, reference_number, description, entry_date, metadata)
-    VALUES (p_tenant_id, p_reference_number, p_description, p_entry_date, p_metadata)
+    VALUES (v_tenant_id, p_reference_number, p_description, p_entry_date, p_metadata)
     RETURNING id INTO v_journal_entry_id;
 
     -- 4. Insert Journal Entry Lines and Update Balances

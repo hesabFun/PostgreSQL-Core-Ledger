@@ -10,10 +10,12 @@ CREATE OR REPLACE FUNCTION create_account(
     RETURNS UUID AS
 $$
 DECLARE
+    v_tenant_id UUID := current_setting('app.current_tenant_id')::uuid;
     v_account_id UUID;
 BEGIN
     -- Insert the account
     INSERT INTO accounts (
+        tenant_id,
         account_number,
         name,
         description,
@@ -22,6 +24,7 @@ BEGIN
         parent_account_id
     )
     VALUES (
+        v_tenant_id,
         p_account_number,
         p_name,
         p_description,
