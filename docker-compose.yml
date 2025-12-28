@@ -70,11 +70,6 @@ services:
         condition: service_completed_successfully
       migrate:
         condition: service_completed_successfully
-    environment:
-      PGHOST: db
-      PGUSER: ${POSTGRES_USER:-postgres}
-      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      PGDATABASE: ${POSTGRES_DB:-ledger}
     volumes:
       - ./PGTap:/tests
     entrypoint: >
