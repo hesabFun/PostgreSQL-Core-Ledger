@@ -24,17 +24,15 @@ services:
         condition: service_healthy
     working_dir: /workspace
     volumes:
-      - ./schema:/workspace/migrations
-      - ./atlas.hcl:/workspace/atlas.hcl:ro
-    environment:
-      ATLAS_LOG_FORMAT: ${ATLAS_LOG_FORMAT:-cli}
-      URL: "postgres://${PGUSER:-postgres}:${PGPASSWORD:-postgres}@db:${PGPORT:-5432}/${PGDATABASE:-ledger}?search_path=public&sslmode=disable"
-    command: ["migrate", "apply", "--url", "${URL}", "--dir-name", "migrations"]
+      - ./schema:/workspace/migrations:ro
+    command: ["migrate", "apply", "--url", "postgres://${PGUSER:-postgres}:${PGPASSWORD:-postgres}@${PGHOST:-db}:${PGPORT:-5432}/${PGDATABASE:-ledger}?search_path=public&sslmode=disable"]
     restart: "no"
 
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
+    profiles:
+      - manual
     depends_on:
       db:
         condition: service_healthy
@@ -59,10 +57,7 @@ services:
     working_dir: /workspace
     volumes:
       - ./schema:/workspace/migrations
-      - ./atlas.hcl:/workspace/atlas.hcl
-    environment:
-      ATLAS_LOG_FORMAT: ${ATLAS_LOG_FORMAT:-cli}
-    command: ["migrate", "hash"]
+    command: ["migrate", "hash", "--url", "postgres://${PGUSER:-postgres}:${PGPASSWORD:-postgres}@${PGHOST:-db}:${PGPORT:-5432}/${PGDATABASE:-ledger}?search_path=public&sslmode=disable"]
     restart: "no"
 
   pgtap:
