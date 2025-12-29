@@ -3,7 +3,7 @@ services:
     image: pshaddel/postgres-pgtap:18
     container_name: pgsql_db
     ports:
-      - "127.0.0.1:${PGPORT:-5432}:5432"
+      - "127.0.0.1:5432:${PGPORT:-5432}"
     volumes:
       - db_data:/var/lib/postgresql
     environment:
