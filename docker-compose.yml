@@ -76,7 +76,7 @@ services:
       migrate:
         condition: service_completed_successfully
     volumes:
-      - ./PGTap:/tests
+      - ./PGTap:/tests:ro
     entrypoint: >
       sh -c "psql -c 'CREATE EXTENSION IF NOT EXISTS pgtap;' && pg_prove /tests/*.sql"
 
